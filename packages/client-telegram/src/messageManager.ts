@@ -410,7 +410,7 @@ export class MessageManager {
         state: State
     ): Promise<boolean> {
 
-        if (this.runtime.character.clientConfig?.telegram?.shouldRespondOnlyToMentions) {
+        if (this.runtime.character.clientConfig?.telegram?.shouldRespondOnlyToMentions || MESSAGE_CONSTANTS.READ_ONLY_MENTIONS_AND_RESPONSES) {
             return this._isMessageForMe(message);
         }
 
@@ -429,8 +429,7 @@ export class MessageManager {
         }
 
         // Don't respond to images in group chats
-        if (
-            "photo" in message ||
+        if ("photo" in message ||
             ("document" in message &&
                 message.document?.mime_type?.startsWith("image/"))
         ) {
@@ -678,6 +677,10 @@ export class MessageManager {
         const chatId = ctx.chat?.id.toString();
         const messageText = 'text' in message ? message.text :
                         'caption' in message ? (message as any).caption : '';
+
+        if (MESSAGE_CONSTANTS.READ_ONLY_MENTIONS_AND_RESPONSES && !this._isMessageForMe(message)) {
+            return;
+        }
 
         // Add team handling at the start
         if (this.runtime.character.clientConfig?.telegram?.isPartOfTeam &&

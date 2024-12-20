@@ -6,6 +6,7 @@ export const MESSAGE_CONSTANTS = {
     DEFAULT_SIMILARITY_THRESHOLD_FOLLOW_UPS: 0.4,
     INTEREST_DECAY_TIME: 5 * 60 * 1000, // 5 minutes
     PARTIAL_INTEREST_DECAY: 3 * 60 * 1000, // 3 minutes
+    READ_ONLY_MENTIONS_AND_RESPONSES: true
 } as const;
 
 export const TIMING_CONSTANTS = {
