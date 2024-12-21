@@ -12,20 +12,32 @@ import { REST, Routes } from "discord.js";
 
 export function createApiRouter(agents: Map<string, AgentRuntime>, directClient) {
     const router = express.Router();
+    const apiKey = process.env.DIRECT_CLIENT_API_KEY;
+    const checkAuth = (req, res): boolean => {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.includes(apiKey)) {
+            res.sendStatus(403);
+            return false;
+        }
+        return true;
+    }
 
     router.use(cors());
     router.use(bodyParser.json());
     router.use(bodyParser.urlencoded({ extended: true }));
 
     router.get("/", (req, res) => {
+        if (!checkAuth(req, res)) return;
         res.send("Welcome, this is the REST API!");
     });
 
     router.get("/hello", (req, res) => {
+        if (!checkAuth(req, res)) return;
         res.json({ message: "Hello World!" });
     });
 
     router.get("/agents", (req, res) => {
+        if (!checkAuth(req, res)) return;
         const agentsList = Array.from(agents.values()).map((agent) => ({
             id: agent.agentId,
             name: agent.character.name,
@@ -35,6 +47,7 @@ export function createApiRouter(agents: Map<string, AgentRuntime>, directClient)
     });
 
     router.get("/agents/:agentId", (req, res) => {
+        if (!checkAuth(req, res)) return;
         const agentId = req.params.agentId;
         const agent = agents.get(agentId);
 
@@ -50,6 +63,7 @@ export function createApiRouter(agents: Map<string, AgentRuntime>, directClient)
     });
 
     router.post("/agents/:agentId/set", async (req, res) => {
+        if (!checkAuth(req, res)) return;
         const agentId = req.params.agentId;
         console.log('agentId', agentId)
         let agent:AgentRuntime = agents.get(agentId);
@@ -87,6 +101,7 @@ export function createApiRouter(agents: Map<string, AgentRuntime>, directClient)
 
 
     router.get("/agents/:agentId/channels", async (req, res) => {
+        if (!checkAuth(req, res)) return;
         const agentId = req.params.agentId;
         const runtime = agents.get(agentId);
 

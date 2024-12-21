@@ -74,11 +74,22 @@ export class DirectClient {
             file: File;
         }
 
+        const apiKey = process.env.DIRECT_CLIENT_API_KEY;
+        const checkAuth = (req: express.Request, res: express.Response): boolean => {
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.includes(apiKey)) {
+                res.sendStatus(403);
+                return false;
+            }
+            return true;
+        }
+
         // Update the route handler to use CustomRequest instead of express.Request
         this.app.post(
             "/:agentId/whisper",
             upload.single("file"),
             async (req: CustomRequest, res: express.Response) => {
+                if (!checkAuth(req, res)) return;
                 const audioFile = req.file; // Access the uploaded file using req.file
                 const agentId = req.params.agentId;
 
@@ -129,6 +140,7 @@ export class DirectClient {
         this.app.post(
             "/:agentId/message",
             async (req: express.Request, res: express.Response) => {
+                if (!checkAuth(req, res)) return;
                 const agentId = req.params.agentId;
                 const roomId = stringToUuid(
                     req.body.roomId ?? "default-room-" + agentId
@@ -243,6 +255,7 @@ export class DirectClient {
         this.app.post(
             "/:agentId/image",
             async (req: express.Request, res: express.Response) => {
+                if (!checkAuth(req, res)) return;
                 const agentId = req.params.agentId;
                 const agent = this.agents.get(agentId);
                 if (!agent) {
@@ -271,6 +284,7 @@ export class DirectClient {
         this.app.post(
             "/fine-tune",
             async (req: express.Request, res: express.Response) => {
+                if (!checkAuth(req, res)) return;
                 try {
                     const response = await fetch(
                         "https://api.bageldb.ai/api/v1/asset",
@@ -297,6 +311,7 @@ export class DirectClient {
         this.app.get(
             "/fine-tune/:assetId",
             async (req: express.Request, res: express.Response) => {
+                if (!checkAuth(req, res)) return;
                 const assetId = req.params.assetId;
                 const downloadDir = path.join(
                     process.cwd(),
