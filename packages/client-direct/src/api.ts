@@ -15,7 +15,7 @@ export function createApiRouter(agents: Map<string, AgentRuntime>, directClient)
     const apiKey = process.env.DIRECT_CLIENT_API_KEY;
     const checkAuth = (req, res): boolean => {
         const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.includes(apiKey)) {
+        if ((apiKey && apiKey.length > 0) && (!authHeader || !authHeader.includes(apiKey))) {
             res.sendStatus(403);
             return false;
         }
